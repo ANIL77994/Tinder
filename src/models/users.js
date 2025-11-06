@@ -65,7 +65,7 @@ const userSchema = new mongoose.Schema({
         value === "" || validator.isURL(value, { protocols: ["http", "https"], require_protocol: true }),
       message: "Invalid photo URL",
     },
-    
+
   },
 },
   {
@@ -74,11 +74,11 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.getJWT = function () {
   const user = this;
-  
+
 
   const token = jwt.sign(
     { _id: user._id },
-    "Anildata!@#!",
+    process.env.SECRATEKEY,
     { expiresIn: "1h" }
   );
 

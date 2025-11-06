@@ -1,7 +1,7 @@
 const express = require("express");
 const ConnectionRequest = require("../models/connectionRequests");
 const User = require("../models/users");
-const mongoose = require("mongoose");
+
 
 const requestConnection = async (req, res) => {
     try {
@@ -80,33 +80,25 @@ const requestAcceptancy = async (req, res) => {
 
  
 
-    // ✅ Step 1: Validate status
+
     const validStatuses = ["accepted", "rejected"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status. Must be accepted or rejected." });
     }
-
-    // ✅ Step 2: Find request that belongs to this user (Anil)
     const connectionRequestUser = await ConnectionRequest.findOne({
       _id: requestId,
       toUserId: loggedInUserId,
       status: "interested",
     });
     console.log(connectionRequestUser)
-
     if (!connectionRequestUser) {
       return res.status(404).json({ message: "No pending connection request found for this user." });
     }
 
-    // ✅ Step 3: Update request status
     connectionRequestUser.status = status;
     await connectionRequestUser.save();
-
-   
-
-    // ✅ Step 5: Respond clearly
     return res.status(200).json({
-    //   message: `${toUserId.firstName} has ${status} the connection request from ${fromUser.firstName}.`,
+      message: `${requestId.firstName} has ${status} the connection request from ${loggedInUserId.firstName}.`,
       data: connectionRequestUser,
     });
 
