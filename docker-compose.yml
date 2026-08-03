@@ -1,0 +1,11 @@
+services:
+  tinder:
+    build: .
+    container_name: tinder
+    ports:
+      - "3000:3000"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    env_file:
+      - .env
