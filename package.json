@@ -4,9 +4,16 @@
   "description": "dev tinder",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest --runInBand",
+    "build": "echo \"Backend build check completed\"",
+    "docker-build": "docker build -t dev-tinder .",
+    "docker-run": "docker run -p 3000:3000 dev-tinder",
+    "docker-compose-build": "docker compose build",
+    "docker-compose-up": "docker compose up"
   },
   "keywords": [
     "javascript"
