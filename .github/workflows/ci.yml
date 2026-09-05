@@ -5,11 +5,8 @@ name: Tinder
 on:
   push:
     branches:
-      - main
-      - develop
-      - feature/**
-      - bugfix/**
-
+      - "**"
+      - "!main"
   pull_request:
     branches:
       - main
