@@ -19,7 +19,7 @@ app.use(cors({
   origin: "http://localhost:3000", // your React app URL
   credentials: true,               // allow cookies to be sent
 }));
-
+console.log("hello Backend")
 connectDB()
 app.use("/",authRouter)
 app.use("/",profileRouters)
