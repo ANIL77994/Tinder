@@ -9,7 +9,6 @@ const login = async (req, res) => {
     loginValidator(req);
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    const data = 0
 
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
