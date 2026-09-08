@@ -11,7 +11,8 @@ const useAuth = async (req, res, next) => {
     }
 
     // 2️⃣ Verify token validity
-    const decoded = await jwt.verify(token, process.env.SECRATEKEY); 
+    const secret = process.env.SECRATEKEY || "dev_secret_key_tinder_default";
+    const decoded = await jwt.verify(token, secret); 
 
     // 3️⃣ If verification passed, attach user info
     req.user = decoded;
@@ -24,7 +25,9 @@ const useAuth = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error("Auth Error:", error.message);
+    if (process.env.NODE_ENV !== "test") {
+      console.error("Auth Error:", error.message);
+    }
     return res.status(403).json({ message: "Invalid or expired token" });
   }
 };

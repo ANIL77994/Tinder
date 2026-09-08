@@ -25,10 +25,10 @@ const feedApi = async (req, res) => {
 
         const users = await User.find({
             $and: [
-                { _id: { $nin: Array.from({ hiddenUserFromfeed }) } },
+                { _id: { $nin: Array.from(hiddenUserFromfeed) } },
                 { _id: { $ne: loggeruser._id } }
             ]
-        }).select("firstName lastName email photoUrl").skip(skip).limit(limit)
+        }).select("firstName lastName email photoUrl").skip(skip).limit(limit);
 
         res.status(200).json({
             message: "get all feed data",

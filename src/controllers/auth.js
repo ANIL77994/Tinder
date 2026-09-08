@@ -1,4 +1,3 @@
-const express = require("express");
 const User = require("../models/users");
 const bcrypt = require("bcrypt");
 const {loginValidator} = require("../utils/validates")
@@ -67,8 +66,7 @@ const signUp = async (req, res) => {
 
 // LOGOUT
 const logout = async (req, res) => {
-
-    res.cookie("token", null, { expires: new Data(Data.now()) })
+    res.cookie("token", null, { expires: new Date(Date.now()) })
         .status(200).send({ message: "Logged out successfully" });
 };
 
