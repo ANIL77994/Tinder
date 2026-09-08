@@ -1,6 +1,6 @@
 const User = require("../models/users");
 const bcrypt = require("bcrypt");
-const {loginValidator} = require("../utils/validates")
+const { loginValidator } = require("../utils/validates")
 
 // LOGIN
 const login = async (req, res) => {
@@ -9,6 +9,7 @@ const login = async (req, res) => {
     loginValidator(req);
     const { email, password } = req.body;
     const user = await User.findOne({ email });
+    const data = 0
 
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
@@ -35,39 +36,39 @@ const login = async (req, res) => {
 
 // REGISTRATION
 const signUp = async (req, res) => {
-    try {
-        const { firstName, lastName, email, password, age, photoUrl } = req.body;
+  try {
+    const { firstName, lastName, email, password, age, photoUrl } = req.body;
 
-        if (!firstName || !lastName || !email || !password || !age || !photoUrl) {
-            return res.status(400).json({ message: "All fields required" });
-        }
-
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword,
-        });
-
-        await newUser.save();
-
-        res.status(201).json({ message: "User registered successfully!" });
-    } catch (error) {
-        res.status(500).json({ message: "Error: " + error.message });
+    if (!firstName || !lastName || !email || !password || !age || !photoUrl) {
+      return res.status(400).json({ message: "All fields required" });
     }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    res.status(201).json({ message: "User registered successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error: " + error.message });
+  }
 };
 
 // LOGOUT
 const logout = async (req, res) => {
-    res.cookie("token", null, { expires: new Date(Date.now()) })
-        .status(200).send({ message: "Logged out successfully" });
+  res.cookie("token", null, { expires: new Date(Date.now()) })
+    .status(200).send({ message: "Logged out successfully" });
 };
 
 module.exports = { login, signUp, logout };
