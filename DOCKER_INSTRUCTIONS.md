@@ -52,13 +52,38 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
-### C. `docker-compose.yml`
-Defines the container configuration, runtime variables (`env_file`), and the DNS settings to ensure MongoDB Atlas resolves correctly:
+### C. `nginx/default.conf`
+Configures Nginx as a high-performance reverse proxy listening on standard HTTP port 80 and forwarding requests to the Node.js backend:
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+
+    client_max_body_size 10M;
+
+    location / {
+        proxy_pass http://tinder:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### D. `docker-compose.yml`
+Orchestrates both the Node.js backend service and the Nginx reverse proxy service together:
 ```yaml
 services:
   tinder:
     build: .
     container_name: tinder
+    restart: always
+    expose:
+      - "3000"
     ports:
       - "3000:3000"
     dns:
@@ -66,6 +91,17 @@ services:
       - 1.1.1.1
     env_file:
       - .env
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - tinder
 ```
 
 ---

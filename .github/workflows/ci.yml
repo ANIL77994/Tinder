@@ -1,4 +1,4 @@
-name: Tinder_CI
+name: Tinder CI
 
 on:
   push:

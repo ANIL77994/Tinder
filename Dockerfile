@@ -7,14 +7,14 @@ WORKDIR /tinder
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install production dependencies
+RUN npm ci --omit=dev
 
 # Copy source code
 COPY . .
 
 # Expose application port
-EXPOSE 5000
+EXPOSE 3000
 
 # Start application
 CMD ["npm","start"]
