@@ -1,0 +1,94 @@
+name: Tinder CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push-ecr:
+    name: Build & Push to Amazon ECR
+    runs-on: ubuntu-latest
+    outputs:
+      registry: ${{ steps.login-ecr.outputs.registry }}
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 3: Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 4: Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Step 5: Build, tag, and push Docker image to Amazon ECR
+      - name: Build, Tag, and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: tinder_app
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+  deploy-to-ec2:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push-ecr
+
+    steps:
+      # Step 1: SSH into EC2 and Deploy Container
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            echo "==== Setting up AWS Credentials on EC2 ===="
+            export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+            export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            export AWS_DEFAULT_REGION="${{ secrets.AWS_REGION }}"
+
+            echo "==== Logging in to Amazon ECR ===="
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ needs.build-and-push-ecr.outputs.registry }}
+
+            echo "==== Pulling Latest Image ===="
+            docker pull ${{ needs.build-and-push-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+            echo "==== Stopping and Removing Old Container ===="
+            docker stop tinder || true
+            docker rm tinder || true
+
+            echo "==== Starting New Container ===="
+            docker run -d \
+              --name tinder \
+              --restart always \
+              -p 3000:3000 \
+              --dns 8.8.8.8 --dns 1.1.1.1 \
+              -e PORT=3000 \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e SECRATEKEY="${{ secrets.SECRATEKEY }}" \
+              ${{ needs.build-and-push-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+            echo "==== Cleaning up Unused Docker Images ===="
+            docker image prune -f
+
+            echo "==== Deployment Completed Successfully ===="
+            docker ps --filter "name=tinder"

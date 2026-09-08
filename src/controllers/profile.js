@@ -1,5 +1,4 @@
-const User = require("../models/users");
-const { profileValidates } = require("../utils/validates")
+const { profileValidates } = require("../utils/validates");
 
 const profile = async (req, res) => {
   try {
@@ -25,23 +24,20 @@ const profile = async (req, res) => {
 
 const editProfile = async (req, res) => {
   try { 
-
-
     if (!profileValidates(req.body)) {
       return res.status(400).json({ message: "Not Valid edit api" });
     }
-    const loggedInUser = req.user
+    const loggedInUser = req.user;
 
-    Object.keys(req.body).forEach((key) =>
-      loggedInUser[key] = req.body[key]
-    )
-    const data = req.user
-    res.status(200).json({ message: data })
+    Object.keys(req.body).forEach((key) => {
+      loggedInUser[key] = req.body[key];
+    });
 
+    await loggedInUser.save();
+    res.status(200).json({ message: "Profile updated successfully", data: loggedInUser });
   } catch (error) {
-    res.status(400).send("ERROR:" + error)
+    res.status(400).send("ERROR:" + error.message);
   }
-
-}
+};
 
 module.exports = { profile, editProfile };

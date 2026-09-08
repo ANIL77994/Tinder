@@ -1,4 +1,3 @@
-const express = require("express");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
@@ -75,10 +74,9 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.getJWT = function () {
   const user = this;
 
-
   const token = jwt.sign(
     { _id: user._id },
-    process.env.SECRATEKEY,
+    process.env.SECRATEKEY || "dev_secret_key_tinder_default",
     { expiresIn: "1h" }
   );
 

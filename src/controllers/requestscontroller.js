@@ -1,4 +1,3 @@
-const express = require("express");
 const ConnectionRequest = require("../models/connectionRequests");
 const User = require("../models/users");
 
@@ -75,11 +74,6 @@ const requestAcceptancy = async (req, res) => {
   try {
     const { requestId, status } = req.params;
     const loggedInUserId = req.user._id;  
-    console.log(requestId)
-    console.log(loggedInUserId)   
-
- 
-
 
     const validStatuses = ["accepted", "rejected"];
     if (!validStatuses.includes(status)) {
@@ -90,7 +84,6 @@ const requestAcceptancy = async (req, res) => {
       toUserId: loggedInUserId,
       status: "interested",
     });
-    console.log(connectionRequestUser)
     if (!connectionRequestUser) {
       return res.status(404).json({ message: "No pending connection request found for this user." });
     }
@@ -98,7 +91,7 @@ const requestAcceptancy = async (req, res) => {
     connectionRequestUser.status = status;
     await connectionRequestUser.save();
     return res.status(200).json({
-      message: `${requestId.firstName} has ${status} the connection request from ${loggedInUserId.firstName}.`,
+      message: `Connection request ${status} successfully.`,
       data: connectionRequestUser,
     });
 
