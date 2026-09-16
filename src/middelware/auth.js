@@ -12,7 +12,7 @@ const useAuth = async (req, res, next) => {
 
     // 2️⃣ Verify token validity
     const secret = process.env.SECRATEKEY || "dev_secret_key_tinder_default";
-    const decoded = await jwt.verify(token, secret); 
+    const decoded = await jwt.verify(token, secret);
 
     // 3️⃣ If verification passed, attach user info
     req.user = decoded;

@@ -28,19 +28,25 @@ const userGetDataRecived = async (req, res) => {
 
 const usersConnections = async (req, res) => {
     try {
-        const loggeruseId = req.user
+        const loggeruseId = req.user;
         const connectionRequest = await ConnectionRequest.find({
             $or: [
                 { toUserId: loggeruseId._id, status: "accepted" },
                 { fromUserId: loggeruseId._id, status: "accepted" }
             ]
-        }).populate("fromUserId", "firstName lastName photoUrl");
+        })
+            .populate("fromUserId", "firstName lastName photoUrl")
+            .populate("toUserId", "firstName lastName photoUrl");
+
         if (connectionRequest.length == 0) {
-            return res.json({ message: "no data availbale in the requests" })
+            return res.json({ message: "no data availbale in the requests" });
         }
-        const data = connectionRequest.map((items)=>
-            items.fromUserId
-        )
+        const data = connectionRequest.map((item) => {
+            if (item.fromUserId._id.toString() === loggeruseId._id.toString()) {
+                return item.toUserId;
+            }
+            return item.fromUserId;
+        });
         res.status(200).json({
             message: "Accepted requests retrieved successfully!",
             data

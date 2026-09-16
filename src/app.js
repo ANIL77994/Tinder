@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const connectDB = require("./configs/database");
-const {profileRouters} = require("./routers/profile")
+const { profileRouters } = require("./routers/profile")
 const requestConnection = require("./routers/requests")
 const cookieParser = require("cookie-parser");
 
@@ -11,21 +11,23 @@ const userRouters = require("./routers/user")
 const cors = require("cors");
 
 const feedRouters = require("./routers/feed");
-
+const primiumRouters = require("./routers/primium");
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: "http://localhost:3000", // your React app URL
-  credentials: true,               // allow cookies to be sent
+  origin: "http://localhost:5173",
+  credentials: true,
 }));
-console.log("hello Backend")
+
 connectDB()
-app.use("/",authRouter)
-app.use("/",profileRouters)
-app.use("/",requestConnection)
-app.use("/",userRouters)
-app.use("/",feedRouters)
+
+app.use("/", authRouter)
+app.use("/", profileRouters)
+app.use("/", requestConnection)
+app.use("/", userRouters)
+app.use("/", feedRouters)
+app.use("/", primiumRouters)
 
 
 
@@ -37,4 +39,4 @@ if (process.env.NODE_ENV !== "test") {
   });
 }
 
-module.exports = app;
+module.exports = app;

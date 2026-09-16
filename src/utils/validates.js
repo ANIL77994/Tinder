@@ -6,7 +6,7 @@ const loginValidator = (req) => {
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
-  
+
 
   if (!validator.isEmail(email)) {
     throw new Error("Email is not valid");
@@ -17,15 +17,13 @@ const loginValidator = (req) => {
   }
 };
 
-const profileValidates = (req) => {
+const profileValidates = (reqOrBody) => {
   const allowedFields = ["firstName", "lastName", "age", "photoUrl"];
-   
-  const isValidKeys = Object.keys(req).every((fileld)=>
-allowedFields.includes(fileld)
-)
- 
-
-  return isValidKeys;
+  const data = (reqOrBody && reqOrBody.body) ? reqOrBody.body : reqOrBody;
+  if (!data || typeof data !== "object") return false;
+  const keys = Object.keys(data);
+  if (keys.length === 0) return false;
+  return keys.every((field) => allowedFields.includes(field));
 };
 
 
